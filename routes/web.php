@@ -1,0 +1,137 @@
+<?php
+
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KasirController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RestaurantTableController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER ROUTE
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [CustomerOrderController::class, 'startOrder']);
+
+Route::get('/order', [CustomerOrderController::class, 'startOrder']);
+Route::post('/order/start', [CustomerOrderController::class, 'saveOrderType']);
+Route::get('/order/menu', [CustomerOrderController::class, 'index']);
+
+Route::post('/cart/add/{id}', [CustomerOrderController::class, 'addToCart']);
+Route::post('/cart/minus/{id}', [CustomerOrderController::class, 'minusCart']);
+Route::post('/cart/remove/{id}', [CustomerOrderController::class, 'removeCart']);
+Route::post('/cart/update/{id}', [CustomerOrderController::class, 'updateCart']);
+
+Route::post('/checkout-page', [CustomerOrderController::class, 'saveCustomerName']);
+Route::get('/checkout', [CustomerOrderController::class, 'checkoutPage']);
+Route::post('/checkout', [CustomerOrderController::class, 'checkout']);
+
+Route::get('/invoice/{order}', [CustomerOrderController::class, 'invoice']);
+Route::get('/payment/{order}', [CustomerOrderController::class, 'payment']);
+Route::post('/payment/{order}/confirm', [CustomerOrderController::class, 'confirmPayment']);
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN / OWNER / KASIR / DAPUR ROUTE
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+
+    /*
+    |--------------------------------------------------------------------------
+    | OWNER & ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['role:owner,admin'])->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::resource('categories', CategoryController::class);
+
+        Route::resource('menus', MenuController::class);
+
+        Route::resource('tables', RestaurantTableController::class);
+
+        Route::get('/reports', [ReportController::class, 'index']);
+        Route::post('/reports/generate', [ReportController::class, 'generate']);
+        Route::get('/reports/pdf', [ReportController::class, 'pdf']);
+        Route::get('/reports/excel', [ReportController::class, 'excel']);
+
+        Route::delete('/orders/{order}', [KasirController::class, 'destroyOrder']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | KASIR ACCESS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['role:owner,admin,kasir'])->group(function () {
+
+        Route::get('/kasir/orders', [KasirController::class, 'index']);
+
+        Route::put('/kasir/orders/{order}/status', [KasirController::class, 'updateStatus']);
+
+        Route::put('/kasir/orders/{order}/payment', [KasirController::class, 'updatePayment']);
+
+        Route::get('/kasir/dashboard',[KasirController::class, 'dashboard']);
+
+        Route::get('/kasir/manual-order', [KasirController::class, 'manualOrder']);
+                   
+
+        Route::post('/kasir/manual-order', [KasirController::class, 'storeManualOrder']);
+
+        Route::post('/kasir/manual-order/checkout',
+    [KasirController::class, 'storeManualOrder']);
+
+            });
+           
+                                        
+
+    /*
+    |--------------------------------------------------------------------------
+    | DAPUR ACCESS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['role:owner,admin,dapur'])->group(function () {
+
+        Route::get('/kitchen', [KasirController::class, 'kitchen']);
+
+        Route::put('/kitchen/{order}/done', [KasirController::class, 'done']);
+
+        Route::put('/kitchen/{order}/process',
+    [KasirController::class, 'process']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__.'/auth.php';
