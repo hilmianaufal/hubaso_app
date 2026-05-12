@@ -61,6 +61,73 @@
         font-weight: 600;
         white-space: nowrap;
     }
+
+    .menu-modern-card {
+    background: #f8fafc;
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: .2s;
+    border: 1px solid transparent;
+}
+
+.menu-modern-card:hover {
+    border-color: #dbeafe;
+    transform: translateY(-2px);
+}
+
+.total-modern-box {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.action-box {
+    background: #f8fafc;
+    border-radius: 22px;
+    padding: 22px;
+    height: 100%;
+}
+
+.modern-select {
+    border-radius: 14px;
+    min-height: 50px;
+    border: 1px solid #dbeafe;
+}
+
+.modern-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+}
+
+.modern-action-btn {
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.payment-badge {
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.payment-badge.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.payment-badge.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.payment-badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -264,47 +331,106 @@
 
     </div>
 
-    <div class="card-body p-4">
+<div class="card-body p-4 p-lg-5">
+
+    {{-- MENU LIST --}}
+    <div class="mb-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h6 class="fw-bold mb-0"
+                style="font-size:18px;">
+                🍜 Pesanan Customer
+            </h6>
+
+            <span class="badge rounded-pill px-3 py-2"
+                  style="background:#eff6ff;color:#2563eb;">
+                {{ $order->items->count() }} Item
+            </span>
+
+        </div>
 
         @foreach($order->items as $item)
 
-        <div class="menu-row d-flex justify-content-between align-items-center">
+        <div class="menu-modern-card">
 
-            <div>
-                <strong>
-                    {{ $item->menu->nama ?? 'Menu Dihapus' }}
-                </strong>
+            <div class="d-flex justify-content-between align-items-center">
 
-                <br>
+                <div>
 
-                <small class="text-muted">
-                    Qty: {{ $item->qty }}
-                </small>
-            </div>
+                    <div class="fw-bold text-dark mb-1"
+                         style="font-size:16px;">
 
-            <div class="fw-bold">
-                Rp {{ number_format($item->subtotal) }}
+                        {{ $item->menu->nama ?? 'Menu Dihapus' }}
+
+                    </div>
+
+                    <div class="text-muted small">
+
+                        Qty {{ $item->qty }}
+
+                    </div>
+
+                </div>
+
+                <div class="fw-bold text-primary"
+                     style="font-size:17px;">
+
+                    Rp {{ number_format($item->subtotal) }}
+
+                </div>
+
             </div>
 
         </div>
 
         @endforeach
 
-        <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+    </div>
 
-            <span class="text-muted">
-                Total Pembayaran
-            </span>
+    {{-- TOTAL --}}
+    <div class="total-modern-box mb-4">
 
-            <h4 class="fw-bold mb-0 text-primary">
-                Rp {{ number_format($order->total) }}
-            </h4>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div>
+
+                <div class="text-muted small mb-1">
+                    Total Pembayaran
+                </div>
+
+                <div class="fw-bold"
+                     style="font-size:32px;color:#2563eb;">
+
+                    Rp {{ number_format($order->total) }}
+
+                </div>
+
+            </div>
+
+            <a href="/invoice/{{ $order->id }}"
+               target="_blank"
+               class="btn btn-dark modern-action-btn">
+
+                🖨️ Print Invoice
+
+            </a>
 
         </div>
 
-        <div class="row g-3">
+    </div>
 
-            <div class="col-md-6">
+    {{-- ACTION --}}
+    <div class="row g-4">
+
+        {{-- STATUS ORDER --}}
+        <div class="col-lg-6">
+
+            <div class="action-box">
+
+                <div class="fw-bold mb-3">
+                    📦 Status Order
+                </div>
 
                 <form action="/kasir/orders/{{ $order->id }}/status"
                       method="POST">
@@ -312,13 +438,10 @@
                     @csrf
                     @method('PUT')
 
-                    <label class="form-label fw-semibold">
-                        Status Order
-                    </label>
-
                     <div class="d-flex gap-2">
 
-                        <select name="status" class="form-select">
+                        <select name="status"
+                                class="form-select modern-select">
 
                             <option value="pending"
                                 {{ $order->status == 'pending' ? 'selected' : '' }}>
@@ -337,8 +460,10 @@
 
                         </select>
 
-                        <button class="btn btn-primary btn-modern">
+                        <button class="btn btn-primary modern-action-btn">
+
                             Update
+
                         </button>
 
                     </div>
@@ -347,23 +472,51 @@
 
             </div>
 
-            <div class="col-md-6">
+        </div>
 
-                <label class="form-label fw-semibold">
-                    Status Pembayaran
-                </label>
+        {{-- STATUS PEMBAYARAN --}}
+        <div class="col-lg-6">
 
-                <div class="d-flex gap-2 flex-wrap">
+            <div class="action-box">
 
-                    <form action="/kasir/orders/{{ $order->id }}/payment"
-                          method="POST"
-                          class="d-flex gap-2 flex-grow-1">
+                <div class="fw-bold mb-3">
+                    💳 Status Pembayaran
+                </div>
 
-                        @csrf
-                        @method('PUT')
+                <div class="d-flex flex-wrap gap-2 mb-3">
+
+                    @if($order->payment_status == 'paid')
+
+                        <span class="payment-badge success">
+                            ✅ Sudah Bayar
+                        </span>
+
+                    @elseif($order->payment_status == 'unpaid')
+
+                        <span class="payment-badge danger">
+                            ❌ Belum Bayar
+                        </span>
+
+                    @elseif($order->payment_status == 'waiting_verification')
+
+                        <span class="payment-badge warning">
+                            ⏳ Menunggu Verifikasi
+                        </span>
+
+                    @endif
+
+                </div>
+
+                <form action="/kasir/orders/{{ $order->id }}/payment"
+                      method="POST">
+
+                    @csrf
+                    @method('PUT')
+
+                    <div class="d-flex gap-2">
 
                         <select name="payment_status"
-                                class="form-select">
+                                class="form-select modern-select">
 
                             <option value="unpaid"
                                 {{ $order->payment_status == 'unpaid' ? 'selected' : '' }}>
@@ -380,34 +533,25 @@
                                 Sudah Bayar
                             </option>
 
-                            <option value="rejected"
-                                {{ $order->payment_status == 'rejected' ? 'selected' : '' }}>
-                                Ditolak
-                            </option>
-
                         </select>
 
-                        <button class="btn btn-success btn-modern">
+                        <button class="btn btn-success modern-action-btn">
+
                             Update
+
                         </button>
 
-                    </form>
+                    </div>
 
-                    <a href="/invoice/{{ $order->id }}"
-                       target="_blank"
-                       class="btn btn-dark btn-modern">
-
-                        🖨️ Print
-
-                    </a>
-
-                </div>
+                </form>
 
             </div>
 
         </div>
 
     </div>
+
+</div>
 
 </div>
 
@@ -442,6 +586,8 @@
 </audio>
 
 <script>
+
+    
 let lastOrderCount = {{ count($orders) }};
 
 setInterval(() => {
@@ -509,5 +655,47 @@ resetFilter.addEventListener('click', function () {
     filterStatus.value = 'all';
     filterOrders();
 });
+
+
+
+let lastSnapshot = '';
+
+function getSnapshot()
+{
+    return Array.from(document.querySelectorAll('.order-card'))
+        .map(card => {
+            return [
+                card.dataset.orderId,
+                card.dataset.payment,
+                card.dataset.status
+            ].join('-');
+        })
+        .join('|');
+}
+
+lastSnapshot = getSnapshot();
+
+setInterval(() => {
+    fetch('/kasir/orders')
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const html = parser.parseFromString(data, 'text/html');
+
+            const newSnapshot = Array.from(html.querySelectorAll('.order-card'))
+                .map(card => {
+                    return [
+                        card.dataset.orderId,
+                        card.dataset.payment,
+                        card.dataset.status
+                    ].join('-');
+                })
+                .join('|');
+
+            if (newSnapshot !== lastSnapshot) {
+                location.reload();
+            }
+        });
+}, 5000);
 </script>
 @endsection

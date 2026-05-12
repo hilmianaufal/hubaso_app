@@ -57,14 +57,15 @@ class KasirController extends Controller
 
     public function kitchen()
     {
-      $orders = Order::with(['items.menu', 'table'])
-        ->whereIn('status', ['pending', 'diproses'])
-        ->latest()
-        ->get();
+        $orders = Order::with(['items.menu', 'table'])
+            ->where('payment_status', 'paid')
+            ->whereIn('status', ['pending', 'diproses'])
+            ->latest()
+            ->get();
 
-        return view('kitchen.index',
-                    compact('orders'));
+        return view('kitchen.index', compact('orders'));
     }
+
 
    public function done(Order $order)
     {

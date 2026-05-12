@@ -179,7 +179,7 @@
 document.getElementById('pay-button').addEventListener('click', function () {
     snap.pay('{{ $order->snap_token }}', {
         onSuccess: function(result) {
-            window.location.href = '/invoice/{{ $order->id }}';
+            window.location.href = '/payment/{{ $order->id }}/success';
         },
         onPending: function(result) {
             window.location.href = '/invoice/{{ $order->id }}';

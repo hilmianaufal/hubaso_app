@@ -204,16 +204,26 @@ class CustomerOrderController extends Controller
             return view('customer.payment', compact('order'));
         }
 
-    public function confirmPayment(Order $order)
-    {
-        $order->update([
-            'payment_status' => 'waiting_verification'
-        ]);
+        public function confirmPayment(Order $order)
+        {
+            $order->update([
+                'payment_status' => 'paid',
+                'payment_method' => 'qris',
+            ]);
 
-        return redirect('/invoice/' . $order->id)
-            ->with('success',
-            'Pembayaran berhasil dikirim');
-    }
+            return redirect('/invoice/' . $order->id)
+                ->with('success', 'Pembayaran berhasil');
+        }
+
+        public function paymentSuccess(Order $order)
+        {
+            $order->update([
+                'payment_status' => 'paid',
+                'payment_method' => 'qris',
+            ]);
+
+            return redirect('/invoice/' . $order->id);
+        }
 
     private function cartResponse()
     {

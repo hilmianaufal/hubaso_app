@@ -34,7 +34,8 @@ Route::post('/checkout', [CustomerOrderController::class, 'checkout']);
 Route::get('/invoice/{order}', [CustomerOrderController::class, 'invoice']);
 Route::get('/payment/{order}', [CustomerOrderController::class, 'payment']);
 Route::post('/payment/{order}/confirm', [CustomerOrderController::class, 'confirmPayment']);
-
+Route::get('/payment/{order}/success',
+    [CustomerOrderController::class, 'paymentSuccess']);
 /*
 |--------------------------------------------------------------------------
 | ADMIN / OWNER / KASIR / DAPUR ROUTE

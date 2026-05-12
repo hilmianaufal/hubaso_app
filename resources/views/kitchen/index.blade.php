@@ -295,83 +295,128 @@
 
 </div>
 
-<audio id="notifSound" preload="auto">
-    <source src="{{ asset('audio/dapur.mp3') }}"
-            type="audio/mpeg">
+<audio id="notifSound" preload="auto" playsinline>
+    <source src="{{ asset('audio/dapur.mp3') }}" type="audio/mpeg">
 </audio>
 
 <script>
-let soundEnabled = false;
+    const sound = document.getElementById('notifSound');
+    const enableSoundBtn = document.getElementById('enableSoundBtn');
+    const testSoundBtn = document.getElementById('testSoundBtn');
 
-const sound = document.getElementById('notifSound');
-const enableSoundBtn = document.getElementById('enableSoundBtn');
-const testSoundBtn = document.getElementById('testSoundBtn');
+    let soundEnabled = localStorage.getItem('hubasoKitchenSound') === 'active';
 
-let lastOrderId = Math.max(
-    ...Array.from(document.querySelectorAll('.kitchen-card'))
-        .map(card => parseInt(card.dataset.orderId))
-        .filter(id => !isNaN(id)),
-    0
-);
+    let lastOrderId = Math.max(
+        ...Array.from(document.querySelectorAll('.kitchen-card'))
+            .map(card => parseInt(card.dataset.orderId))
+            .filter(id => !isNaN(id)),
+        0
+    );
 
-enableSoundBtn.addEventListener('click', function () {
-    sound.currentTime = 0;
+    function updateSoundButton()
+    {
+        if (!enableSoundBtn) return;
 
-    sound.play()
-        .then(() => {
-            sound.pause();
-            sound.currentTime = 0;
-
-            soundEnabled = true;
-
+        if (soundEnabled) {
             enableSoundBtn.innerHTML = '✅ Suara Aktif';
             enableSoundBtn.classList.remove('btn-primary');
             enableSoundBtn.classList.add('btn-success');
-        })
-        .catch((error) => {
-            alert('Suara gagal aktif. Cek file audio / izin browser.');
+        } else {
+            enableSoundBtn.innerHTML = '🔔 Aktifkan Suara';
+            enableSoundBtn.classList.remove('btn-success');
+            enableSoundBtn.classList.add('btn-primary');
+        }
+    }
+
+    function unlockSound()
+    {
+        sound.muted = true;
+        sound.currentTime = 0;
+
+        return sound.play()
+            .then(() => {
+                sound.pause();
+                sound.currentTime = 0;
+                sound.muted = false;
+
+                soundEnabled = true;
+                localStorage.setItem('hubasoKitchenSound', 'active');
+
+                updateSoundButton();
+            })
+            .catch(() => {
+                soundEnabled = false;
+                localStorage.removeItem('hubasoKitchenSound');
+
+                updateSoundButton();
+            });
+    }
+
+    function playNotification()
+    {
+        if (!soundEnabled) return;
+
+        sound.muted = false;
+        sound.currentTime = 0;
+
+        sound.play().catch(() => {
+            soundEnabled = false;
+            localStorage.removeItem('hubasoKitchenSound');
+            updateSoundButton();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateSoundButton();
+
+        // Coba aktifkan otomatis saat halaman dibuka
+        unlockSound();
+    });
+
+    enableSoundBtn.addEventListener('click', function () {
+        unlockSound();
+    });
+
+    testSoundBtn.addEventListener('click', function () {
+        soundEnabled = true;
+        localStorage.setItem('hubasoKitchenSound', 'active');
+        updateSoundButton();
+
+        sound.muted = false;
+        sound.currentTime = 0;
+
+        sound.play().catch(error => {
+            alert('Suara gagal diputar. Cek file audio atau izin browser.');
             console.log(error);
         });
-});
-
-testSoundBtn.addEventListener('click', function () {
-    sound.currentTime = 0;
-
-    sound.play().catch(error => {
-        alert('File suara tidak bisa diputar.');
-        console.log(error);
     });
-});
 
-setInterval(() => {
-    fetch('/kitchen')
-        .then(response => response.text())
-        .then(data => {
-            const parser = new DOMParser();
-            const html = parser.parseFromString(data, 'text/html');
+    setInterval(() => {
+        fetch('/kitchen')
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const html = parser.parseFromString(data, 'text/html');
 
-            const ids = Array.from(html.querySelectorAll('.kitchen-card'))
-                .map(card => parseInt(card.dataset.orderId))
-                .filter(id => !isNaN(id));
+                const ids = Array.from(html.querySelectorAll('.kitchen-card'))
+                    .map(card => parseInt(card.dataset.orderId))
+                    .filter(id => !isNaN(id));
 
-            const newestOrderId = ids.length > 0 ? Math.max(...ids) : 0;
+                const newestOrderId = ids.length > 0 ? Math.max(...ids) : 0;
 
-            if (newestOrderId > lastOrderId) {
-                lastOrderId = newestOrderId;
+                if (newestOrderId > lastOrderId) {
+                    lastOrderId = newestOrderId;
 
-                if (soundEnabled) {
-                    sound.currentTime = 0;
-                    sound.play().catch(error => {
-                        console.log(error);
-                    });
+                    playNotification();
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2500);
                 }
-
-                setTimeout(() => {
-                    location.reload();
-                }, 2500);
-            }
-        });
-}, 5000);
+            })
+            .catch(error => {
+                console.log('Gagal cek order dapur:', error);
+            });
+    }, 5000);
 </script>
-
 @endsection
