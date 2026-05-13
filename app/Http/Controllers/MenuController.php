@@ -36,7 +36,19 @@ class MenuController extends Controller
         $foto = null;
 
         if ($request->hasFile('foto')) {
-            $foto = $request->file('foto')->store('menus', 'public');
+            $folder = public_path('uploads/menus');
+
+            if (!file_exists($folder)) {
+                mkdir($folder, 0755, true);
+            }
+
+            $file = $request->file('foto');
+
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            $file->move($folder, $filename);
+
+            $foto = 'uploads/menus/' . $filename;
         }
 
         Menu::create([
@@ -70,11 +82,23 @@ class MenuController extends Controller
         $foto = $menu->foto;
 
         if ($request->hasFile('foto')) {
-            if ($menu->foto) {
-                Storage::disk('public')->delete($menu->foto);
+            if ($menu->foto && file_exists(public_path($menu->foto))) {
+                unlink(public_path($menu->foto));
             }
 
-            $foto = $request->file('foto')->store('menus', 'public');
+            $folder = public_path('uploads/menus');
+
+            if (!file_exists($folder)) {
+                mkdir($folder, 0755, true);
+            }
+
+            $file = $request->file('foto');
+
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            $file->move($folder, $filename);
+
+            $foto = 'uploads/menus/' . $filename;
         }
 
         $menu->update([
@@ -86,20 +110,16 @@ class MenuController extends Controller
         ]);
 
         return redirect('/menus')->with('success', 'Menu berhasil diupdate');
-}
-
-    public function destroy(Menu $menu)
-    {
-        // hapus foto
-        if ($menu->foto) {
-
-            Storage::disk('public')
-                    ->delete($menu->foto);
-        }
-
-        // hapus data
-        $menu->delete();
-
-        return redirect('/menus');
     }
+
+        public function destroy(Menu $menu)
+        {
+            if ($menu->foto && file_exists(public_path($menu->foto))) {
+                unlink(public_path($menu->foto));
+            }
+
+            $menu->delete();
+
+            return redirect('/menus')->with('success', 'Menu berhasil dihapus');
+        }
 }
