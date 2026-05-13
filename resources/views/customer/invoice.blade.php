@@ -176,6 +176,17 @@ Tanggal:
 
 </div>
 
+<div class="mt-2 no-print">
+
+    <a href="/order/menu"
+       class="btn btn-primary w-100">
+
+        🍜 Pesan Lagi
+
+    </a>
+
+</div>
+
 </div>
 <script>
 
