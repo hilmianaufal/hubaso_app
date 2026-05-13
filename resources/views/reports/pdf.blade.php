@@ -1,113 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-
-    <title>Laporan PDF</title>
+    <title>Laporan Penjualan</title>
 
     <style>
-
         body {
-
-            font-family: sans-serif;
-
-            font-size: 14px;
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+            color: #111827;
         }
 
-        table {
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 15px;
+        }
 
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #1e40af;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            color: #6b7280;
+        }
+
+        .summary {
             width: 100%;
+            margin-bottom: 20px;
+        }
 
+        .summary td {
+            padding: 10px;
+            border: none;
+        }
+
+        .summary-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .summary-label {
+            color: #6b7280;
+            font-size: 11px;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-top: 4px;
+        }
+
+        table.report {
+            width: 100%;
             border-collapse: collapse;
-
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
-        table, th, td {
-
-            border: 1px solid black;
-        }
-
-        th, td {
-
-            padding: 8px;
-
+        table.report th {
+            background: #1e40af;
+            color: white;
+            padding: 9px;
+            font-size: 11px;
             text-align: left;
         }
 
-        h2, h4 {
-
-            margin: 0;
+        table.report td {
+            padding: 9px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
         }
 
-    </style>
+        table.report tr:nth-child(even) {
+            background: #f9fafb;
+        }
 
+        .text-right {
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-diproses {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-selesai {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 10px;
+            color: #6b7280;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>
-    Laporan Penjualan
-</h2>
+<div class="header">
+    <h2>Laporan Penjualan</h2>
+    <p>HUBASO Restaurant POS</p>
+</div>
 
-<h4>
-    Tanggal:
-    {{ $tanggal }}
-</h4>
+<table class="summary">
+    <tr>
+        <td width="50%">
+            <div class="summary-box">
+                <div class="summary-label">Tanggal Laporan</div>
+                <div class="summary-value">{{ $tanggal }}</div>
+            </div>
+        </td>
 
-<h4>
-    Total Pendapatan:
-    Rp {{ number_format($totalPendapatan) }}
-</h4>
+        <td width="50%">
+            <div class="summary-box">
+                <div class="summary-label">Total Pendapatan</div>
+                <div class="summary-value">
+                    Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 
-<table>
-
+<table class="report">
     <thead>
-
         <tr>
-
-            <th>No</th>
-            <th>Meja</th>
-            <th>Customer</th>
-            <th>Total</th>
-            <th>Status</th>
-
+            <th width="5%">No</th>
+            <th width="15%">Tipe</th>
+            <th width="20%">Customer</th>
+            <th width="20%">Meja / Bungkus</th>
+            <th width="20%" class="text-right">Total</th>
+            <th width="20%">Status</th>
         </tr>
-
     </thead>
 
     <tbody>
+        @forelse($orders as $order)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
 
-        @foreach($orders as $order)
+                <td>
+                    {{ $order->jenis_pesanan ?? '-' }}
+                </td>
 
-        <tr>
+                <td>
+                    {{ $order->nama_customer ?? '-' }}
+                </td>
 
-            <td>
-                {{ $loop->iteration }}
-            </td>
+                <td>
+                    @if($order->jenis_pesanan == 'Bungkus')
+                        Bungkus
+                    @else
+                        Meja {{ $order->table->nomor_meja ?? $order->nomor_meja_manual ?? '-' }}
+                    @endif
+                </td>
 
-            <td>
-                {{ $order->table->nomor_meja }}
-            </td>
+                <td class="text-right">
+                    Rp {{ number_format($order->total, 0, ',', '.') }}
+                </td>
 
-            <td>
-                {{ $order->nama_customer }}
-            </td>
-
-            <td>
-                Rp {{ number_format($order->total) }}
-            </td>
-
-            <td>
-                {{ $order->status }}
-            </td>
-
-        </tr>
-
-        @endforeach
-
+                <td>
+                    @if($order->status == 'pending')
+                        <span class="badge badge-pending">Pending</span>
+                    @elseif($order->status == 'diproses')
+                        <span class="badge badge-diproses">Diproses</span>
+                    @elseif($order->status == 'selesai')
+                        <span class="badge badge-selesai">Selesai</span>
+                    @else
+                        {{ $order->status ?? '-' }}
+                    @endif
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">
+                    Tidak ada data penjualan.
+                </td>
+            </tr>
+        @endforelse
     </tbody>
-
 </table>
+
+<div class="footer">
+    Dicetak otomatis oleh HUBASO POS
+</div>
 
 </body>
 </html>

@@ -8,6 +8,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantTableController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,7 +83,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/excel', [ReportController::class, 'excel']);
 
         Route::delete('/orders/{order}', [KasirController::class, 'destroyOrder']);
-    });
+
+        Route::resource('users', UserManagementController::class);
+
+        Route::get('/kasir/payment/{order}',
+    [KasirController::class, 'paymentPage']);
+
+        Route::post('/kasir/payment/{order}',
+            [KasirController::class, 'processPayment']);
+
+            Route::get('/kasir/qris/{order}',
+            [KasirController::class, 'showQrisPage']);
+
+        Route::post('/kasir/qris/{order}/confirm',
+            [KasirController::class, 'confirmQrisPayment']);
+                
+            });
 
     /*
     |--------------------------------------------------------------------------
@@ -107,6 +123,18 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/kasir/manual-order/checkout',
     [KasirController::class, 'storeManualOrder']);
+
+            Route::get('/kasir/payment/{order}',
+    [KasirController::class, 'paymentPage']);
+
+Route::post('/kasir/payment/{order}',
+    [KasirController::class, 'processPayment']);
+
+    Route::get('/kasir/qris/{order}',
+    [KasirController::class, 'showQrisPage']);
+
+Route::post('/kasir/qris/{order}/confirm',
+    [KasirController::class, 'confirmQrisPayment']);
 
             });
            

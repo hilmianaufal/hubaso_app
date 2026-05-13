@@ -68,7 +68,7 @@
 <div class="center">
 
     <h3>
-        BASO APP
+        HUBASO
     </h3>
 
     <small>

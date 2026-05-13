@@ -76,27 +76,39 @@
                 <div class="d-flex gap-2 flex-wrap">
 
                     <a href="{{ url('/order') }}"
-                       target="_blank"
-                       class="btn btn-light rounded-pill flex-fill">
+                    target="_blank"
+                    class="btn btn-light rounded-pill flex-fill">
 
                         <i class="bi bi-box-arrow-up-right"></i>
                         Buka Order
 
                     </a>
 
+                    <a href="data:image/png;base64,{!! base64_encode(
+                            QrCode::format('svg')
+                                ->size(500)
+                                ->margin(2)
+                                ->generate(url('/order'))
+                        ) !!}"
+                    download="QR-{{ $table->nomor_meja }}.png"
+                    class="btn btn-primary rounded-pill flex-fill">
+
+                        <i class="bi bi-download"></i>
+                        Download QR
+
+                    </a>
+
                     <form action="{{ route('tables.destroy', $table->id) }}"
-                          method="POST"
-                          class="flex-fill"
-                          onsubmit="return confirm('Yakin ingin menghapus meja ini?')">
+                        method="POST"
+                        class="flex-fill"
+                        onsubmit="return confirm('Yakin ingin menghapus meja ini?')">
 
                         @csrf
                         @method('DELETE')
 
                         <button class="btn btn-danger rounded-pill w-100">
-
                             <i class="bi bi-trash"></i>
                             Hapus
-
                         </button>
 
                     </form>

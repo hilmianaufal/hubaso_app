@@ -353,6 +353,15 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                         <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}"
+                            href="/users">
+                                <i class="bi bi-people"></i>
+                                <span>User</span>
+                            </a>
+                        </li>
+                        
+
                     @endif
 
                     @if(in_array(auth()->user()->role, ['owner', 'admin', 'kasir']))

@@ -143,7 +143,7 @@ public function storeManualOrder(Request $request)
 
     if (empty($cart)) {
         return back()->withErrors([
-            'cart' => 'Keranjang masih kosong'
+            'cart' => 'Keranjang masih kosong',
         ]);
     }
 
@@ -177,8 +177,10 @@ public function storeManualOrder(Request $request)
         'catatan'            => $request->catatan,
         'total'              => $total,
         'status'             => 'pending',
-        'payment_status'     => 'paid',
+        'payment_status'     => 'unpaid',
         'payment_method'     => $request->payment_method,
+        'bayar'              => null,
+        'kembalian'          => null,
         'queue_number'       => $this->generateQueue(),
     ]);
 
@@ -197,7 +199,7 @@ public function storeManualOrder(Request $request)
 
     session()->forget('cart');
 
-    return redirect('/invoice/' . $order->id);
+    return redirect('/kasir/payment/' . $order->id);
 }
 
     public function process(Order $order)
@@ -209,5 +211,75 @@ public function storeManualOrder(Request $request)
         return back()->with('success', 'Pesanan sedang dimasak');
     }
 
+    public function paymentPage(Order $order)
+{
+    $order->load('items.menu');
+
+    return view('kasir.payment', compact('order'));
+}
+
+public function processPayment(Request $request, Order $order)
+{
+    $request->validate([
+        'payment_method' => 'required',
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | QRIS FLOW
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->payment_method == 'qris') {
+
+        $order->update([
+            'payment_method' => 'qris',
+            'payment_status' => 'waiting_verification',
+        ]);
+
+        return redirect('/kasir/qris/' . $order->id);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CASH FLOW
+    |--------------------------------------------------------------------------
+    */
+
+    $request->validate([
+        'bayar' => 'required|numeric|min:' . $order->total,
+    ]);
+
+    $bayar = (int) $request->bayar;
+
+    $kembalian = $bayar - $order->total;
+
+    $order->update([
+        'payment_status' => 'paid',
+        'payment_method' => 'cash',
+        'bayar' => $bayar,
+        'kembalian' => $kembalian,
+    ]);
+
+    return redirect('/invoice/' . $order->id)
+        ->with('success', 'Pembayaran berhasil');
+}
+
+
+
+public function showQrisPage(Order $order)
+{
+    return view('kasir.qris', compact('order'));
+}
+
+public function confirmQrisPayment(Order $order)
+{
+    $order->update([
+        'payment_status' => 'paid',
+    ]);
+
+    return redirect('/invoice/' . $order->id)
+        ->with('success', 'QRIS berhasil diverifikasi');
+}
 
 }
