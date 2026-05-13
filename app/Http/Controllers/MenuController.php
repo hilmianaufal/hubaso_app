@@ -5,10 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
+    private function uploadFolder()
+    {
+        return base_path('../public_html/hubaso/uploads/menus');
+    }
+
+    private function uploadFile($file)
+    {
+        $folder = $this->uploadFolder();
+
+        if (!file_exists($folder)) {
+            mkdir($folder, 0755, true);
+        }
+
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        $file->move($folder, $filename);
+
+        return 'uploads/menus/' . $filename;
+    }
+
+    private function deleteFile($path)
+    {
+        if (!$path) {
+            return;
+        }
+
+        $filePath = base_path('../public_html/hubaso/' . $path);
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+    }
+
     public function index()
     {
         $menus = Menu::with('category')->latest()->get();
@@ -36,19 +68,7 @@ class MenuController extends Controller
         $foto = null;
 
         if ($request->hasFile('foto')) {
-            $folder = public_path('uploads/menus');
-
-            if (!file_exists($folder)) {
-                mkdir($folder, 0755, true);
-            }
-
-            $file = $request->file('foto');
-
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
-            $file->move($folder, $filename);
-
-            $foto = 'uploads/menus/' . $filename;
+            $foto = $this->uploadFile($request->file('foto'));
         }
 
         Menu::create([
@@ -82,23 +102,9 @@ class MenuController extends Controller
         $foto = $menu->foto;
 
         if ($request->hasFile('foto')) {
-            if ($menu->foto && file_exists(public_path($menu->foto))) {
-                unlink(public_path($menu->foto));
-            }
+            $this->deleteFile($menu->foto);
 
-            $folder = public_path('uploads/menus');
-
-            if (!file_exists($folder)) {
-                mkdir($folder, 0755, true);
-            }
-
-            $file = $request->file('foto');
-
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
-            $file->move($folder, $filename);
-
-            $foto = 'uploads/menus/' . $filename;
+            $foto = $this->uploadFile($request->file('foto'));
         }
 
         $menu->update([
@@ -112,14 +118,12 @@ class MenuController extends Controller
         return redirect('/menus')->with('success', 'Menu berhasil diupdate');
     }
 
-        public function destroy(Menu $menu)
-        {
-            if ($menu->foto && file_exists(public_path($menu->foto))) {
-                unlink(public_path($menu->foto));
-            }
+    public function destroy(Menu $menu)
+    {
+        $this->deleteFile($menu->foto);
 
-            $menu->delete();
+        $menu->delete();
 
-            return redirect('/menus')->with('success', 'Menu berhasil dihapus');
-        }
+        return redirect('/menus')->with('success', 'Menu berhasil dihapus');
+    }
 }
