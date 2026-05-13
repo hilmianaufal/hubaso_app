@@ -255,7 +255,7 @@
                          style="cursor: {{ $menu->stok > 0 ? 'pointer' : 'not-allowed' }};">
 
                         @if($menu->foto)
-                            <img src="{{ asset('storage/' . $menu->foto) }}"
+                            <img src="{{ asset($menu->foto) }}"
                                  class="card-img-top menu-img">
                         @else
                             <div class="d-flex align-items-center justify-content-center bg-light"
