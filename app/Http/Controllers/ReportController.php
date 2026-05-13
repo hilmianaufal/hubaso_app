@@ -55,26 +55,22 @@ class ReportController extends Controller
 
             $totalPendapatan = $orders->sum('total');
 
-            $pdf = Pdf::loadView('reports.pdf', compact(
+            return Pdf::loadView('reports.pdf', compact(
                 'orders',
                 'tanggalMulai',
                 'tanggalSelesai',
                 'totalPendapatan'
-            ));
-
-            return $pdf->download('laporan-penjualan.pdf');
+            ))->download('laporan-penjualan.pdf');
         }
 
-    public function excel(Request $request)
-    {
-        $tanggal = $request->tanggal;
+        public function excel(Request $request)
+        {
+            $tanggalMulai = $request->tanggal_mulai;
+            $tanggalSelesai = $request->tanggal_selesai;
 
-        return Excel::download(
-
-            new ReportExport($tanggal),
-
-            'laporan-penjualan.xlsx'
-
-        );
-    }
+            return Excel::download(
+                new ReportExport($tanggalMulai, $tanggalSelesai),
+                'laporan-penjualan.xlsx'
+            );
+        }
 }

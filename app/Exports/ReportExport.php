@@ -4,48 +4,51 @@ namespace App\Exports;
 
 use App\Models\Order;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ReportExport implements
-    FromCollection,
-    WithHeadings
+class ReportExport implements FromCollection
 {
-    protected $tanggal;
+    protected $tanggalMulai;
+    protected $tanggalSelesai;
 
-    public function __construct($tanggal)
+    public function __construct($tanggalMulai, $tanggalSelesai)
     {
-        $this->tanggal = $tanggal;
+        $this->tanggalMulai = $tanggalMulai;
+        $this->tanggalSelesai = $tanggalSelesai;
     }
 
     public function collection()
     {
-        return Order::whereDate(
-                'created_at',
-                $this->tanggal
-            )
-            ->get([
-                'id',
-                'nama_customer',
-                'jenis_pesanan',
-                'total',
-                'status',
-                'payment_status',
-                'created_at'
-            ]);
-    }
+        return Order::with('table')
+            ->whereBetween('created_at', [
+                $this->tanggalMulai . ' 00:00:00',
+                $this->tanggalSelesai . ' 23:59:59',
+            ])
+            ->get()
+            ->map(function ($order) {
 
-    public function headings(): array
-    {
-        return [
+                return [
 
-            'ID',
-            'Customer',
-            'Jenis Pesanan',
-            'Total',
-            'Status Order',
-            'Status Pembayaran',
-            'Tanggal'
+                    'Queue' => $order->queue_number,
 
-        ];
+                    'Customer' => $order->nama_customer,
+
+                    'Jenis Pesanan' => $order->jenis_pesanan,
+
+                    'Meja / Bungkus' =>
+                        $order->jenis_pesanan == 'Bungkus'
+                            ? 'Bungkus'
+                            : ($order->table->nomor_meja
+                                ?? $order->nomor_meja_manual
+                                ?? '-'),
+
+                    'Total' => $order->total,
+
+                    'Status' => $order->status,
+
+                    'Pembayaran' => $order->payment_status,
+
+                    'Tanggal' => $order->created_at->format('d-m-Y H:i'),
+                ];
+            });
     }
 }

@@ -129,9 +129,11 @@
 <table class="summary">
     <tr>
         <td width="50%">
-            <div class="summary-box">
-                <div class="summary-label">Tanggal Laporan</div>
-                <div class="summary-value">{{ $tanggal }}</div>
+            <div class="summary-label">Rentang Tanggal</div>
+            <div class="summary-value">
+                {{ \Carbon\Carbon::parse($tanggalMulai)->format('d M Y') }}
+                -
+                {{ \Carbon\Carbon::parse($tanggalSelesai)->format('d M Y') }}
             </div>
         </td>
 
