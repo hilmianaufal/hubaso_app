@@ -29,12 +29,12 @@
              style="border-radius: 24px; overflow: hidden;">
 
             @if($menu->foto)
-                <img src="{{ asset('storage/' . $menu->foto) }}"
-                     style="height: 180px; object-fit: cover;"
-                     class="card-img-top">
+                <img src="{{ asset($menu->foto) }}"
+                    style="height: 180px; object-fit: cover;"
+                    class="card-img-top">
             @else
                 <div class="d-flex align-items-center justify-content-center bg-light"
-                     style="height: 180px;">
+                    style="height: 180px;">
                     <span class="text-muted">Tidak ada foto</span>
                 </div>
             @endif
