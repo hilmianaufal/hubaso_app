@@ -176,33 +176,40 @@ class CustomerOrderController extends Controller
                     compact('order'));
     }
 
-        public function payment(Order $order)
-        {
-            Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-            Config::$isProduction = false;
-            Config::$isSanitized = true;
-            Config::$is3ds = true;
+    public function payment(Order $order)
+    {
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = filter_var(
+            config('services.midtrans.is_production'),
+            FILTER_VALIDATE_BOOLEAN
+        );
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
 
-            if (!$order->snap_token) {
-                $params = [
-                    'transaction_details' => [
-                        'order_id' => 'HUBASO-' . $order->id . '-' . time(),
-                        'gross_amount' => (int) $order->total,
-                    ],
-                    'customer_details' => [
-                        'first_name' => $order->nama_customer,
-                    ],
-                ];
-
-                $snapToken = Snap::getSnapToken($params);
-
-                $order->update([
-                    'snap_token' => $snapToken,
-                ]);
-            }
-
-            return view('customer.payment', compact('order'));
+        if (!Config::$serverKey) {
+            dd('MIDTRANS_SERVER_KEY masih null. Cek .env dan config/services.php');
         }
+
+        if (!$order->snap_token) {
+            $params = [
+                'transaction_details' => [
+                    'order_id' => 'HUBASO-' . $order->id . '-' . time(),
+                    'gross_amount' => (int) $order->total,
+                ],
+                'customer_details' => [
+                    'first_name' => $order->nama_customer,
+                ],
+            ];
+
+            $snapToken = Snap::getSnapToken($params);
+
+            $order->update([
+                'snap_token' => $snapToken,
+            ]);
+        }
+
+        return view('customer.payment', compact('order'));
+    }
 
         public function confirmPayment(Order $order)
         {
