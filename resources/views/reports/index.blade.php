@@ -143,32 +143,43 @@
 <div class="card modern-card mb-4">
     <div class="card-body p-4">
 
-        <form action="/reports/generate" method="POST">
-            @csrf
+    <form action="/reports/generate" method="POST">
+        @csrf
 
-            <div class="row g-3 align-items-end">
+        <div class="row g-3 align-items-end">
 
-                <div class="col-md-5">
-                    <label class="form-label fw-bold">
-                        Pilih Tanggal Laporan
-                    </label>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">
+                    Tanggal Mulai
+                </label>
 
-                    <input type="date"
-                           name="tanggal"
-                           class="form-control"
-                           value="{{ old('tanggal', $tanggal ?? '') }}"
-                           required>
-                </div>
-
-                <div class="col-md-3">
-                    <button class="btn btn-primary btn-modern w-100">
-                        🔍 Generate
-                    </button>
-                </div>
-
+                <input type="date"
+                    name="tanggal_mulai"
+                    class="form-control"
+                    value="{{ old('tanggal_mulai', $tanggalMulai ?? '') }}"
+                    required>
             </div>
 
-        </form>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">
+                    Tanggal Selesai
+                </label>
+
+                <input type="date"
+                    name="tanggal_selesai"
+                    class="form-control"
+                    value="{{ old('tanggal_selesai', $tanggalSelesai ?? '') }}"
+                    required>
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn btn-primary btn-modern w-100">
+                    🔍 Generate
+                </button>
+            </div>
+
+        </div>
+    </form>
 
     </div>
 </div>
@@ -178,42 +189,55 @@
 <div class="row g-4 mb-4">
 
     <div class="col-md-4">
+
         <div class="summary-card">
-            <div class="summary-label">Tanggal</div>
-            <div class="summary-value">
-                {{ \Carbon\Carbon::parse($tanggal)->format('d M Y') }}
+
+            <div class="summary-label">
+                Rentang Tanggal
             </div>
+
+            <div class="summary-value"
+                 style="font-size:20px;">
+
+                {{ \Carbon\Carbon::parse($tanggalMulai)->format('d M Y') }}
+
+                <span class="text-muted fw-normal">
+                    -
+                </span>
+
+                {{ \Carbon\Carbon::parse($tanggalSelesai)->format('d M Y') }}
+
+            </div>
+
         </div>
+
     </div>
 
     <div class="col-md-4">
+
         <div class="summary-card">
-            <div class="summary-label">Total Order</div>
+
+            <div class="summary-label">
+                Total Order
+            </div>
+
             <div class="summary-value">
                 {{ $orders->count() }}
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="summary-card">
-            <div class="summary-label">Total Pendapatan</div>
-            <div class="summary-value text-primary">
-                Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
-            </div>
         </div>
-    </div>
 
+    </div>
 </div>
 
 <div class="d-flex gap-2 mb-4 flex-wrap">
 
-    <a href="/reports/pdf?tanggal={{ $tanggal }}"
+    <a href="/reports/pdf?tanggal_mulai={{ $tanggalMulai }}&tanggal_selesai={{ $tanggalSelesai }}"
        class="btn btn-danger btn-modern">
         📄 Export PDF
     </a>
 
-    <a href="/reports/excel?tanggal={{ $tanggal }}"
+    <a href="/reports/excel?tanggal_mulai={{ $tanggalMulai }}&tanggal_selesai={{ $tanggalSelesai }}"
        class="btn btn-success btn-modern">
         📗 Export Excel
     </a>

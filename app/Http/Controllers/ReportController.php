@@ -17,44 +17,53 @@ class ReportController extends Controller
 
     public function generate(Request $request)
     {
-        $tanggal = $request->tanggal;
+        $request->validate([
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        ]);
+
+        $tanggalMulai = $request->tanggal_mulai;
+        $tanggalSelesai = $request->tanggal_selesai;
 
         $orders = Order::with('table')
-            ->whereDate('created_at', $tanggal)
+            ->whereBetween('created_at', [
+                $tanggalMulai . ' 00:00:00',
+                $tanggalSelesai . ' 23:59:59',
+            ])
             ->get();
 
         $totalPendapatan = $orders->sum('total');
 
         return view('reports.index', compact(
             'orders',
-            'tanggal',
+            'tanggalMulai',
+            'tanggalSelesai',
             'totalPendapatan'
         ));
     }
+        public function pdf(Request $request)
+        {
+            $tanggalMulai = $request->tanggal_mulai;
+            $tanggalSelesai = $request->tanggal_selesai;
 
-    public function pdf(Request $request)
-    {
-        $tanggal = $request->tanggal;
+            $orders = Order::with('table')
+                ->whereBetween('created_at', [
+                    $tanggalMulai . ' 00:00:00',
+                    $tanggalSelesai . ' 23:59:59',
+                ])
+                ->get();
 
-        $orders = Order::with('table')
-            ->whereDate('created_at', $tanggal)
-            ->get();
+            $totalPendapatan = $orders->sum('total');
 
-        $totalPendapatan = $orders->sum('total');
-
-        $pdf = Pdf::loadView(
-            'reports.pdf',
-            compact(
+            $pdf = Pdf::loadView('reports.pdf', compact(
                 'orders',
-                'tanggal',
+                'tanggalMulai',
+                'tanggalSelesai',
                 'totalPendapatan'
-            )
-        );
+            ));
 
-        return $pdf->download(
-            'laporan-penjualan.pdf'
-        );
-    }
+            return $pdf->download('laporan-penjualan.pdf');
+        }
 
     public function excel(Request $request)
     {
