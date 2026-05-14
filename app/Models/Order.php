@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -22,6 +23,7 @@ protected $fillable = [
     'discount_type',
     'discount_value',
     'discount_amount',
+    'user_id',
 ];
 
 public function table()
@@ -33,5 +35,10 @@ public function table()
 public function items()
 {
     return $this->hasMany(OrderItem::class);
+}
+
+public function user()
+{
+    return $this->belongsTo(User::class);
 }
 }

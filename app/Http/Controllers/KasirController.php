@@ -12,12 +12,14 @@ class KasirController extends Controller
 {
     public function index()
     {
-        $orders = Order::with([
-            'table',
-            'items.menu'
-        ])->latest()->get();
+    $orders = Order::with([
+            'items.menu',
+            'user'
+        ])
+        ->latest()
+        ->get();
 
-        return view('kasir.orders', compact('orders'));
+    return view('kasir.orders', compact('orders'));
     }
         private function generateQueue()
         {
@@ -172,7 +174,7 @@ public function storeManualOrder(Request $request)
             'nomor_meja_manual'  => $request->jenis_pesanan == 'Makan Di Tempat'
                 ? $request->nomor_meja
                 : null,
-
+            'user_id' => auth()->id(),
             'nama_customer'      => $request->nama_customer,
             'jenis_pesanan'      => $request->jenis_pesanan,
             'catatan'            => $request->catatan,

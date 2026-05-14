@@ -234,6 +234,13 @@
             <div class="info-chip">
                 🍽️ {{ $order->jenis_pesanan }}
             </div>
+            @if($order->user)
+
+                <div class="info-chip">
+                    🧑‍💼 Kasir: {{ $order->user->name ?? 'Tidak tercatat' }}
+                </div>
+
+                @endif
 
             @if($order->catatan)
 
