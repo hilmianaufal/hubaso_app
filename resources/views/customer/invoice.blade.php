@@ -178,7 +178,7 @@ Tanggal:
 
 <div class="mt-2 no-print">
 
-    <a href="/order/menu"
+    <a href="/kasir/manual-order"
        class="btn btn-primary w-100">
 
         🍜 Pesan Lagi
