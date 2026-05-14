@@ -228,44 +228,70 @@ public function storeManualOrder(Request $request)
 public function processPayment(Request $request, Order $order)
 {
     $request->validate([
-        'payment_method' => 'required',
+        'payment_method' => 'required|in:cash,qris,debit',
+        'discount_type' => 'nullable|in:nominal,percent',
+        'discount_value' => 'nullable|numeric|min:0',
     ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | QRIS FLOW
-    |--------------------------------------------------------------------------
-    */
+    $subtotal = $order->subtotal ?? $order->total;
+
+    $discountType = $request->discount_type;
+    $discountValue = (int) ($request->discount_value ?? 0);
+
+    $discountAmount = 0;
+
+    if ($discountType === 'percent') {
+        $discountAmount = round($subtotal * $discountValue / 100);
+    }
+
+    if ($discountType === 'nominal') {
+        $discountAmount = $discountValue;
+    }
+
+    if ($discountAmount > $subtotal) {
+        $discountAmount = $subtotal;
+    }
+
+    $totalAkhir = $subtotal - $discountAmount;
 
     if ($request->payment_method == 'qris') {
-
         $order->update([
-            'payment_method' => 'qris',
-            'payment_status' => 'waiting_verification',
+            'subtotal'        => $subtotal,
+            'discount_type'   => $discountType,
+            'discount_value'  => $discountValue,
+            'discount_amount' => $discountAmount,
+            'total'           => $totalAkhir,
+            'payment_method'  => 'qris',
+            'payment_status'  => 'waiting_verification',
         ]);
 
         return redirect('/kasir/qris/' . $order->id);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CASH FLOW
-    |--------------------------------------------------------------------------
-    */
-
     $request->validate([
-        'bayar' => 'required|numeric|min:' . $order->total,
+        'bayar' => 'required|numeric|min:0',
     ]);
 
     $bayar = (int) $request->bayar;
 
-    $kembalian = $bayar - $order->total;
+    if ($bayar < $totalAkhir) {
+        return back()->withErrors([
+            'bayar' => 'Uang bayar kurang. Total setelah diskon Rp ' . number_format($totalAkhir, 0, ',', '.')
+        ])->withInput();
+    }
+
+    $kembalian = $bayar - $totalAkhir;
 
     $order->update([
-        'payment_status' => 'paid',
-        'payment_method' => 'cash',
-        'bayar' => $bayar,
-        'kembalian' => $kembalian,
+        'subtotal'        => $subtotal,
+        'discount_type'   => $discountType,
+        'discount_value'  => $discountValue,
+        'discount_amount' => $discountAmount,
+        'total'           => $totalAkhir,
+        'payment_status'  => 'paid',
+        'payment_method'  => $request->payment_method,
+        'bayar'           => $bayar,
+        'kembalian'       => $kembalian,
     ]);
 
     return redirect('/invoice/' . $order->id)

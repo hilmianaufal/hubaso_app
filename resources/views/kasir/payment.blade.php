@@ -521,13 +521,12 @@
                                 Uang Bayar
                             </div>
 
-                            <input type="number"
-                                   name="bayar"
-                                   id="bayarInput"
-                                   class="money-input"
-                                   placeholder="0"
-                                   min="{{ $order->total }}"
-                                   required>
+                        <input type="number"
+                            name="bayar"
+                            id="bayarInput"
+                            class="money-input"
+                            placeholder="0"
+                            required>
 
                         </div>
 
