@@ -426,7 +426,94 @@
                             </div>
 
                         </div>
+<div class="card border-0 shadow-sm mb-4"
+     style="border-radius:20px;">
 
+    <div class="card-body">
+
+        <h5 class="fw-bold mb-3">
+            🎁 Discount
+        </h5>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+                    Jenis Discount
+                </label>
+
+                <select name="discount_type"
+                        id="discountType"
+                        class="form-select">
+
+                    <option value="">
+                        Tanpa Discount
+                    </option>
+
+                    <option value="nominal">
+                        Nominal
+                    </option>
+
+                    <option value="percent">
+                        Persen
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+                    Nilai Discount
+                </label>
+
+                <input type="number"
+                       name="discount_value"
+                       id="discountValue"
+                       class="form-control"
+                       value="0"
+                       min="0">
+
+            </div>
+
+        </div>
+
+        <div class="mt-3">
+
+            <div class="d-flex justify-content-between mb-2">
+
+                <span>
+                    Potongan
+                </span>
+
+                <strong id="discountAmount">
+                    Rp 0
+                </strong>
+
+            </div>
+
+            <div class="d-flex justify-content-between">
+
+                <span class="fw-bold">
+                    Total Setelah Discount
+                </span>
+
+                <h4 class="fw-bold text-primary"
+                    id="finalTotal">
+
+                    Rp {{ number_format($order->total) }}
+
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
                         {{-- INPUT --}}
                         <div class="mb-4">
 
@@ -560,33 +647,57 @@
 <script>
     const bayarInput = document.getElementById('bayarInput');
     const kembalianDisplay = document.getElementById('kembalianDisplay');
-    const total = parseInt(
-        document.getElementById('totalDisplay').dataset.total
-    );
+    const discountType = document.getElementById('discountType');
+    const discountValue = document.getElementById('discountValue');
+    const discountAmount = document.getElementById('discountAmount');
+    const finalTotalDisplay = document.getElementById('finalTotal');
+    const exactMoney = document.getElementById('exactMoney');
 
-    const successAnimation = document.getElementById('successAnimation');
-    const successSound = document.getElementById('successSound');
+    const subtotal = parseInt(document.getElementById('totalDisplay').dataset.total);
+
+    let finalTotal = subtotal;
 
     function formatRupiah(number)
     {
-        return new Intl.NumberFormat('id-ID').format(number);
+        return new Intl.NumberFormat('id-ID').format(Math.round(number));
+    }
+
+    function calculateDiscount()
+    {
+        const type = discountType.value;
+        const value = parseInt(discountValue.value) || 0;
+
+        let discount = 0;
+
+        if (type === 'percent') {
+            discount = subtotal * value / 100;
+        } else if (type === 'nominal') {
+            discount = value;
+        }
+
+        if (discount > subtotal) {
+            discount = subtotal;
+        }
+
+        finalTotal = subtotal - discount;
+
+        discountAmount.innerHTML = 'Rp ' + formatRupiah(discount);
+        finalTotalDisplay.innerHTML = 'Rp ' + formatRupiah(finalTotal);
+
+        updateKembalian();
     }
 
     function updateKembalian()
     {
         const bayar = parseInt(bayarInput.value) || 0;
-
-        const kembalian = bayar - total;
+        const kembalian = bayar - finalTotal;
 
         if (kembalian < 0) {
-
             kembalianDisplay.innerHTML =
                 `Kurang Rp ${formatRupiah(Math.abs(kembalian))}`;
 
             kembalianDisplay.style.color = '#f87171';
-
         } else {
-
             kembalianDisplay.innerHTML =
                 `Rp ${formatRupiah(kembalian)}`;
 
@@ -595,56 +706,35 @@
     }
 
     bayarInput.addEventListener('input', updateKembalian);
+    discountType.addEventListener('change', calculateDiscount);
+    discountValue.addEventListener('input', calculateDiscount);
 
-    document.querySelectorAll('.add-money')
-        .forEach(button => {
+    document.querySelectorAll('.add-money').forEach(button => {
+        button.addEventListener('click', function () {
+            const value = parseInt(this.dataset.value);
+            const current = parseInt(bayarInput.value) || 0;
 
-            button.addEventListener('click', function () {
-
-                const value = parseInt(this.dataset.value);
-
-                const current = parseInt(bayarInput.value) || 0;
-
-                bayarInput.value = current + value;
-
-                updateKembalian();
-            });
-
-        });
-
-    document.getElementById('exactMoney')
-        .addEventListener('click', function () {
-
-            bayarInput.value = total;
+            bayarInput.value = current + value;
 
             updateKembalian();
-
         });
+    });
 
-    document.querySelectorAll('.payment-method')
-        .forEach(method => {
+    exactMoney.addEventListener('click', function () {
+        bayarInput.value = Math.round(finalTotal);
+        updateKembalian();
+    });
 
-            method.addEventListener('click', function () {
-
-                document.querySelectorAll('.payment-method')
-                    .forEach(item => {
-                        item.classList.remove('active');
-                    });
-
-                this.classList.add('active');
-
+    document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', function () {
+            document.querySelectorAll('.payment-method').forEach(item => {
+                item.classList.remove('active');
             });
 
+            this.classList.add('active');
         });
+    });
 
-    document.getElementById('paymentForm')
-        .addEventListener('submit', function () {
-
-            successAnimation.style.display = 'flex';
-
-            successSound.play().catch(() => {});
-
-        });
+    calculateDiscount();
 </script>
-
 @endsection

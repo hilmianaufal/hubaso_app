@@ -255,7 +255,7 @@
                 <thead>
                     <tr>
                         <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Tipe</th>
+                        <th class="px-4 py-3">Tanggal Pesanan</th>
                         <th class="px-4 py-3">Customer</th>
                         <th class="px-4 py-3">Meja / Bungkus</th>
                         <th class="px-4 py-3">Total</th>
@@ -273,9 +273,15 @@
                         </td>
 
                         <td class="px-4 py-3">
-                            <span class="order-type">
-                                {{ $order->jenis_pesanan ?? '-' }}
-                            </span>
+
+                            <div class="fw-bold">
+                                {{ $order->created_at->format('d M Y') }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ $order->created_at->format('H:i') }} WIB
+                            </small>
+
                         </td>
 
                         <td class="px-4 py-3 fw-semibold">

@@ -18,6 +18,10 @@ protected $fillable = [
     'catatan',
     'snap_token',
     'payment_method',
+    'subtotal',
+    'discount_type',
+    'discount_value',
+    'discount_amount',
 ];
 
 public function table()

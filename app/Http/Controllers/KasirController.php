@@ -167,22 +167,29 @@ public function storeManualOrder(Request $request)
         $total += $item['harga'] * $item['qty'];
     }
 
-    $order = Order::create([
-        'restaurant_table_id' => null,
-        'nomor_meja_manual'  => $request->jenis_pesanan == 'Makan Di Tempat'
-            ? $request->nomor_meja
-            : null,
-        'nama_customer'      => $request->nama_customer,
-        'jenis_pesanan'      => $request->jenis_pesanan,
-        'catatan'            => $request->catatan,
-        'total'              => $total,
-        'status'             => 'pending',
-        'payment_status'     => 'unpaid',
-        'payment_method'     => $request->payment_method,
-        'bayar'              => null,
-        'kembalian'          => null,
-        'queue_number'       => $this->generateQueue(),
-    ]);
+        $order = Order::create([
+            'restaurant_table_id' => null,
+            'nomor_meja_manual'  => $request->jenis_pesanan == 'Makan Di Tempat'
+                ? $request->nomor_meja
+                : null,
+
+            'nama_customer'      => $request->nama_customer,
+            'jenis_pesanan'      => $request->jenis_pesanan,
+            'catatan'            => $request->catatan,
+
+            'subtotal'           => $total,
+            'discount_type'      => null,
+            'discount_value'     => 0,
+            'discount_amount'    => 0,
+            'total'              => $total,
+
+            'status'             => 'pending',
+            'payment_status'     => 'unpaid',
+            'payment_method'     => $request->payment_method,
+            'bayar'              => null,
+            'kembalian'          => null,
+            'queue_number'       => $this->generateQueue(),
+        ]);
 
     foreach ($cart as $id => $item) {
         OrderItem::create([
