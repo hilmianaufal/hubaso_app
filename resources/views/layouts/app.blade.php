@@ -283,6 +283,13 @@
             }
         }
     </style>
+
+    <link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HUBASO">
 </head>
 <body>
 
@@ -461,6 +468,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function () {
+                    console.log('HUBASO PWA aktif');
+                })
+                .catch(function (error) {
+                    console.log('PWA gagal:', error);
+                });
+        });
+    }
+</script>
 </body>
 </html>
