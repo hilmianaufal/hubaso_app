@@ -44,7 +44,7 @@ class ReportExport implements FromCollection
                     'Total' => $order->total,
 
                     'Status' => $order->status,
-
+                    'Kasir' => $order->user->name ?? 'Customer QR',
                     'Pembayaran' => $order->payment_status,
 
                     'Tanggal' => $order->created_at->format('d-m-Y H:i'),

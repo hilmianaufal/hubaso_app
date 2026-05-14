@@ -25,7 +25,7 @@ class ReportController extends Controller
         $tanggalMulai = $request->tanggal_mulai;
         $tanggalSelesai = $request->tanggal_selesai;
 
-        $orders = Order::with('table')
+        $orders = Order::with(['table', 'user'])
             ->whereBetween('created_at', [
                 $tanggalMulai . ' 00:00:00',
                 $tanggalSelesai . ' 23:59:59',
@@ -46,7 +46,7 @@ class ReportController extends Controller
             $tanggalMulai = $request->tanggal_mulai;
             $tanggalSelesai = $request->tanggal_selesai;
 
-            $orders = Order::with('table')
+            $orders = Order::with(['table', 'user'])
                 ->whereBetween('created_at', [
                     $tanggalMulai . ' 00:00:00',
                     $tanggalSelesai . ' 23:59:59',

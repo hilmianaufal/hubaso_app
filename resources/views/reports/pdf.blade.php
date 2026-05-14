@@ -157,6 +157,7 @@
             <th width="20%">Meja / Bungkus</th>
             <th width="20%" class="text-right">Total</th>
             <th width="20%">Status</th>
+            <th width="20%">Kasir</th>
         </tr>
     </thead>
 
@@ -180,7 +181,7 @@
                         Meja {{ $order->table->nomor_meja ?? $order->nomor_meja_manual ?? '-' }}
                     @endif
                 </td>
-
+    
                 <td class="text-right">
                     Rp {{ number_format($order->total, 0, ',', '.') }}
                 </td>
@@ -196,6 +197,9 @@
                         {{ $order->status ?? '-' }}
                     @endif
                 </td>
+                   <td>
+                        {{ $order->user->name ?? 'Customer QR' }}
+                    </td>
             </tr>
         @empty
             <tr>
