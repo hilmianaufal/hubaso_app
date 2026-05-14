@@ -178,12 +178,25 @@ Tanggal:
 
 <div class="mt-2 no-print">
 
-    <a href="/kasir/manual-order"
-       class="btn btn-primary w-100">
+    @auth
 
-        🍜 Pesan Lagi
+        <a href="/kasir/manual-order"
+           class="btn btn-primary w-100">
 
-    </a>
+            🍜 Pesan Lagi
+
+        </a>
+
+    @else
+
+        <a href="/order"
+           class="btn btn-primary w-100">
+
+            🍜 Pesan Lagi
+
+        </a>
+
+    @endauth
 
 </div>
 
