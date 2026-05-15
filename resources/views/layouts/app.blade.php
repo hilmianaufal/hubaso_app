@@ -423,7 +423,15 @@
                                 <span>Dapur</span>
                             </a>
                         </li>
-
+                    @endif
+             @if(in_array(auth()->user()->role, ['dapur']))
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('menus*') ? 'active' : '' }}"
+                               href="/menus">
+                                <i class="bi bi-cup-hot"></i>
+                                <span>Menu</span>
+                            </a>
+                        </li>
                     @endif
 
                     <li class="nav-item ms-lg-2 nav-logout">

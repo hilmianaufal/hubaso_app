@@ -146,6 +146,8 @@ Route::post('/kasir/qris/{order}/confirm',
 
         Route::put('/kitchen/{order}/process',
     [KasirController::class, 'process']);
+
+        Route::resource('menus', MenuController::class);
     });
 });
 
